@@ -26,6 +26,8 @@ _testmain.go
 # Backup files
 *~
 *#
+*.json
 
-# Build
+# Build from my macs
 go-rest
+websrvr

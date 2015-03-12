@@ -103,5 +103,9 @@ func TodoDownload(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 		panic(err)
 	}
 	
+	if err = ioutil.WriteFile("todos.json", b, 0777); err != nil {
+		panic(err)
+	}
+	
 	fmt.Println(b)
 }
