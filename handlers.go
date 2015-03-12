@@ -7,15 +7,36 @@ import (
 	"html"
 	"io"
 	"io/ioutil"
-
+	
+	"log"
+	"time"
+	
 	mux "github.com/julienschmidt/httprouter"
 )
 
+func Logger(r *http.Request) {
+	
+	start:= time.Now()
+	
+	log.Printf(
+		"%s\t%s\t%s\t%s",
+		r.Method,
+		r.RequestURI,
+		//name,
+		time.Since(start),
+	)
+}
+
 func Index(w http.ResponseWriter, r *http.Request, _ mux.Params) {
+	
+	Logger(r)
+	
 	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 }
 
 func TodoIndex(w http.ResponseWriter, r *http.Request, _ mux.Params) {
+
+	Logger(r)
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
@@ -26,10 +47,16 @@ func TodoIndex(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 }
 
 func TodoShow(w http.ResponseWriter, r *http.Request, ps mux.Params) {
+	
+	Logger(r)
+	
 	fmt.Fprintf(w, "Todo show: %s\n", ps.ByName("todoId"))
 }
 
 func TodoCreate(w http.ResponseWriter, r *http.Request, _ mux.Params) {
+	
+	Logger(r)
+	
 	var todo Todo
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
@@ -57,6 +84,9 @@ func TodoCreate(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 }
 
 func TodoDownload(w http.ResponseWriter, r *http.Request, _ mux.Params) {
+	
+	Logger(r)
+	
 	if err := json.NewEncoder(w).Encode(todos); err != nil {
 		panic(err)
 	}

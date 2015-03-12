@@ -12,11 +12,13 @@ func NewRouter() *mux.Router {
 
 	for _, route := range routes {
 		
-		//var handler mux.Handle
-
-		//handler = Logger(router, route.Method, route.Name, route.Pattern, route.Handle)
-		Logger(router, route.Method, route.Name, route.Pattern, route.Handle)
-		//router.Handle(route.Method, route.Pattern, route.Handle)
+		/*
+		var handler mux.Handle
+		
+		handler = Logger(router, route.Method, route.Pattern, route.Name)
+		*/
+		
+		router.Handle(route.Method, route.Pattern, route.Handle)
 	}
 
 	return router
