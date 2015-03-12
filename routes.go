@@ -1,15 +1,15 @@
 package main
 
 import (
-	
-       "net/http"
-	   
-	   mux "github.com/julienschmidt/httprouter"
+//	"net/http"
+	 mux "github.com/julienschmidt/httprouter"
 )
 
 type Route struct {
-	Name, Method, Pattern 	string
-	HandlerFunc 			http.HandlerFunc
+	Name        string
+	Method      string
+	Pattern     string
+	Handle      mux.Handle
 }
 
 type Routes []Route
@@ -34,7 +34,3 @@ var routes = Routes{
 		TodoShow,
 	},
 }
-
-
-
-

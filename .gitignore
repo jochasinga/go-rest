@@ -26,3 +26,6 @@ _testmain.go
 # Backup files
 *~
 *#
+
+# Build
+go-rest
