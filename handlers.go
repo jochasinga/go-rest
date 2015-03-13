@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"html"
+//	"html"
 	"io"
 	"io/ioutil"
-	
+	"strconv"
 	"log"
 	"time"
 	
@@ -30,8 +30,10 @@ func Logger(r *http.Request) {
 func Index(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 	
 	Logger(r)
-	
-	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+
+	fmt.Fprintf(w, "<h1>Hello, welcome to my blog</h1>")
+	//fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+	//fmt.Fprintf(w, "Hello, %s\n", p.ByName("anything"))
 }
 
 func TodoIndex(w http.ResponseWriter, r *http.Request, _ mux.Params) {
@@ -50,7 +52,23 @@ func TodoShow(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 	
 	Logger(r)
 	
-	fmt.Fprintf(w, "Todo show: %s\n", ps.ByName("todoId"))
+	//fmt.Fprintf(w, "Todo show: %s\n", ps.ByName("todoId"))
+
+	for _, todo := range todos {
+
+		id, err := strconv.Atoi(ps.ByName("todoId"))
+		if err != nil {
+			panic(err)
+		}
+		
+		if todo.Id == id {
+			if err = json.NewEncoder(w).Encode(todo); err != nil {
+				panic(err)
+			}
+			return
+		}
+	}
+
 }
 
 func TodoCreate(w http.ResponseWriter, r *http.Request, _ mux.Params) {
