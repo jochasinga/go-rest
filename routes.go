@@ -24,25 +24,25 @@ var routes = Routes{
 	Route{
 		"TodoIndex",
 		"GET",
-		"/todos",
-		TodoIndex,
+		"/posts",
+		PostIndex,
 	},
 	Route{
 		"TodoShow",
 		"GET",
-		"/todos/:todoId",
-		TodoShow,
+		"/posts/:id",
+		PostShow,
 	},
 	Route{
 		"TodoCreate",
 		"POST",
-		"/todos",
-		TodoCreate,
+		"/posts",
+		PostCreate,
 	},
 	Route{
 		"TodoDownload",
 		"GET",
-		"/todos.json",
-		TodoDownload,
+		"/posts.json",
+		PostDownload,
 	},
 }
