@@ -22,27 +22,35 @@ var routes = Routes{
 		Index,
 	},
 	Route{
-		"TodoIndex",
+		"PostIndex",
 		"GET",
 		"/posts",
 		PostIndex,
 	},
 	Route{
-		"TodoShow",
+		"PostShow",
 		"GET",
-		"/posts/:id",
+		"/posts/:postId",
 		PostShow,
 	},
 	Route{
-		"TodoCreate",
+		"PostCreate",
 		"POST",
 		"/posts",
 		PostCreate,
 	},
 	Route{
-		"TodoDownload",
+		"PostDelete",
+		"POST",
+		"/posts/del/:postId",
+		PostDelete,
+	},
+	/*n
+	Route{
+		"PostDownload",
 		"GET",
 		"/posts.json",
 		PostDownload,
 	},
+	*/
 }

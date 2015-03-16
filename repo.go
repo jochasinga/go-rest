@@ -9,87 +9,119 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
-var currentId int
+var currentPostId int
+var currentUserId int
 
-var posts Posts
+func RedisConnect() redis.Conn {
+	c, err := redis.Dial("tcp", ":6379")
+	HandleError(err)
+	return c
+}
 
 // Give us some seed data
 func init() {
-	/*
-	RepoCreateTodo(Todo{Name: "Write presentation"})
-	RepoCreateTodo(Todo{Name: "Host meetup"})
-	*/
-	c, err := redis.Dial("tcp", ":6379")
-	if err != nil {
-		panic(err)
-	}
-	defer c.Close()
 	
-	p1 := CreatePost(Post{
+	CreatePost(Post{
 			User: User{
 					Username: "pieohpah",
 					Email: "jo.chasinga@gmail.com",
 			},
 			Topic: "My First Post",
 			Text:  "Hello everyone! This is awesome.",
-			//Comment: Comment{},
-			Timestamp: time.Now(),
 	})
 	
-	p2 := CreatePost(Post{
+	CreatePost(Post{
 			User: User{
 					Username: "IronMan",
 					Email: "iron_mann@hotmale.com",
 			},
 			Topic: "Greeting",
 			Text: "Greetings from Ironman",
-			Comment: Comment{},
-			Timestamp: time.Now(),
 	})
+}
+
+func FindAll() Posts {
+
+	c := RedisConnect()
+	defer c.Close()
 	
-	SetPost(c, p1)
-	SetPost(c, p2)
+	keys, err := c.Do("KEYS", "post:*")
+
+	HandleError(err)
+	
+	var posts Posts
+	
+	for _, k := range keys.([]interface{}) {
+		
+		var post Post
+		
+		reply, err := c.Do("GET", k.([]byte))
+
+		HandleError(err)
+		
+		if err := json.Unmarshal(reply.([]byte), &post); err != nil {
+			panic(err)
+		}
+		posts = append(posts, post)
+	}
+	return posts
 }
 
 func FindPost(id int) Post {
-	for _, t := range posts {
-		if t.Id == id {
-			return t
-		}
+	
+	var post Post
+
+	c := RedisConnect()
+	defer c.Close()
+	
+	reply, err := c.Do("GET", "post:" + strconv.Itoa(id))
+
+	HandleError(err)
+	
+	fmt.Println("GET OK")
+	
+	if err = json.Unmarshal(reply.([]byte), &post); err != nil {
+		panic(err)
 	}
-	// return empty Todo if not found
-	return Post{}
+	return post
 }
 
-func CreatePost(p Post) Post {
-	currentId += 1
-	p.Id = currentId
-	posts = append(posts, p)
-	return p
-}
-
-func SetPost(c redis.Conn, p Post) {
+func CreatePost(p Post) {
+	
+	currentPostId += 1
+	currentUserId += 1
+	
+	p.Id = currentPostId
+	p.User.Id = currentUserId
+	p.Timestamp = time.Now()
+	
+	c := RedisConnect()
+	defer c.Close()
 	
 	b, err := json.Marshal(p)
-	if err != nil {
-		panic(err)
-	}
+
+	HandleError(err)
 	
-	// Save a whole blob of JSON
+	// Save JSON blob to Redis
 	reply, err := c.Do("SET", "post:" + strconv.Itoa(p.Id), b)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(reply)
+
+	HandleError(err)
+	
+	fmt.Println("GET ", reply)
 	
 }
 
-func DestroyPost(id int) error {
-	for i, p := range posts {
-		if p.Id == id {
-			posts = append(posts[:i], posts[i+1:]...)
-			return nil
-		}
+func DeletePost(id int) {
+	
+	c := RedisConnect()
+	defer c.Close()
+	
+	reply, err := c.Do("DEL", "post:" + strconv.Itoa(id))
+	HandleError(err)
+	
+	if reply.(int) != 1 {
+		fmt.Println("No post removed")
+	} else {
+		fmt.Println("Post removed")
 	}
-	return fmt.Errorf("Couldn't find Todo with id of %d to delete", id)
 }

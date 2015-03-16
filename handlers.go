@@ -28,47 +28,36 @@ func Logger(r *http.Request) {
 }
 
 func Index(w http.ResponseWriter, r *http.Request, _ mux.Params) {
-	
-	Logger(r)
 
-	fmt.Fprintf(w, "<h1>Hello, welcome to my blog</h1>")
-	//fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-	//fmt.Fprintf(w, "Hello, %s\n", p.ByName("anything"))
+	fmt.Fprintf(w, "<h1 style=\"font-family: Helvetica;\">Hello, welcome to blog service</h1>")
 }
 
 func PostIndex(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 
-	Logger(r)
-
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
+	
+	var posts Posts
+	
+	posts = FindAll()
 
 	if err := json.NewEncoder(w).Encode(posts); err != nil {
 		panic(err)
 	}
+
 }
 
 func PostShow(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 	
-	Logger(r)
+	id, err := strconv.Atoi(ps.ByName("postId"))
 	
-	//fmt.Fprintf(w, "Todo show: %s\n", ps.ByName("todoId"))
+	HandleError(err)
 
-	for _, todo := range posts {
-
-		id, err := strconv.Atoi(ps.ByName("todoId"))
-		if err != nil {
-			panic(err)
-		}
-		
-		if todo.Id == id {
-			if err = json.NewEncoder(w).Encode(todo); err != nil {
-				panic(err)
-			}
-			return
-		}
+	post := FindPost(id)
+	
+	if err := json.NewEncoder(w).Encode(post); err != nil {
+		panic(err)
 	}
-
 }
 
 func PostCreate(w http.ResponseWriter, r *http.Request, _ mux.Params) {
@@ -77,14 +66,13 @@ func PostCreate(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 	
 	var post Post
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
-	if err != nil {
-		panic(err)
-	}
+	HandleError(err)
+
 	if err := r.Body.Close(); err != nil {
 		panic(err)
 	}
 
-	// Save JSON to Todo struct
+	// Save JSON to Post struct
 	if err := json.Unmarshal(body, &post); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
@@ -93,37 +81,16 @@ func PostCreate(w http.ResponseWriter, r *http.Request, _ mux.Params) {
 		}
 	}
 
-	t := CreatePost(post)
+	CreatePost(post)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(t); err != nil {
-		panic(err)
-	}
 }
 
-func PostDownload(w http.ResponseWriter, r *http.Request, _ mux.Params) {
+func PostDelete(w http.ResponseWriter, r *http.Request, ps mux.Params) {
 	
-	Logger(r)
-	
-	if err := json.NewEncoder(w).Encode(posts); err != nil {
-		panic(err)
-	}
+	id, err := strconv.Atoi(ps.ByName("postId"))
+	HandleError(err)
 
-	/* TODO: Write to file and download to user
-	if enc, err := json.NewEncoder(w)
-	if err != nil {
-		panic(err)
-	}
-        */
-	
-	b, err := json.Marshal(posts) 
-	if err != nil {
-		panic(err)
-	}
-	
-	if err = ioutil.WriteFile("todos.json", b, 0777); err != nil {
-		panic(err)
-	}
-	
-	fmt.Println(b)
+	DeletePost(id)
 }
+
