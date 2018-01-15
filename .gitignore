@@ -31,3 +31,6 @@ _testmain.go
 # Build from my macs
 go-rest
 websrvr
+
+# redis stuff
+*.rdb
